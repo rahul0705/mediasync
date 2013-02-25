@@ -16,9 +16,9 @@ files=`find $DIR -maxdepth 1 -type f \( ! -iname ".*" \) | grep -v rename.sh`
 for original_file in $files
 do
 	#get rid of DIR (hardcoded here) in string
-	file=`echo $original_file | sed -e 's/\/home\/pi\/backup\///'`
+	file=`echo $original_file | sed -e "s/\"$DIR\"\///"`
 	#check if file has regex for a tv show
-	echo $file | grep -P "\.s([0-9]+)e([0-9]+)" > /dev/null
+	echo $file | grep -P "\.s([0-9]+)e([0-9]+)" > /de"/null
 	
 	#MOVIE
 	if [ $? -gt 0 ]
