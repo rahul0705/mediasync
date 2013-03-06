@@ -8,7 +8,7 @@ echo `date` >> $LOG
 rename -v y/A-Z/a-z/ $DIR/*
 
 #get rid of Scene group
-echo `rename -v s/\-.*\.\(\[a-z\]\{3\}\)/\.\\$1/ $DIR/*` >> $LOG
+echo `rename -v s/\-.*?\(\.\[^\.\]*\)\$/\$1/ $DIR/*` >> $LOG
 
 #find all files in DIR exclude rename.sh
 files=`find $DIR -maxdepth 1 -type f \( ! -iname ".*" \) | grep -v rename.sh`
