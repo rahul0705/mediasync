@@ -16,6 +16,10 @@ NETLOG="$HOME/logs/network.log"
 PULLLOG="$HOME/logs/pull.log"
 PUSHLOG="$HOME/logs/push.log"
 
+clean(){
+    rm "$HOME/logs/*"
+}
+
 isServerUp(){
     netcheck=`$PING -c1 $SERVER 2>&1 | grep unknown`
 
@@ -49,3 +53,5 @@ done
 
 $FLOCK -n $WLFILE -c "$RSYNC -PravzL --delete --log-file=$PUSHLOG $CACHE duo:/home/pi/backup/"
 $FLOCK -n $WLFILE -c "rm -r $CACHE"
+#!/bin/bash
+
