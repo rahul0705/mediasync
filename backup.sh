@@ -5,6 +5,7 @@ RSYNC=/usr/bin/rsync
 SSH=/usr/bin/ssh
 PING=/usr/bin/ping
 DATE=/usr/bin/date
+$DIR=$1
 RLFILE="$HOME/scripts/.read_lock_file"
 WLFILE="$HOME/scripts/.write_lock_file"
 
@@ -85,7 +86,7 @@ rename(){
 
     for original_file in $files
     do
-        #get rid of DIR (hardcoded here) in string
+        #get rid of DIR in string
         file=`echo $original_file | sed -e "s/\"$DIR\"\///"`
         #check if file has regex for a tv show
         echo $file | grep -P "\.s([0-9]+)e([0-9]+)" > /dev/null
