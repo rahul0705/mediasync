@@ -15,6 +15,7 @@ CACHE="$HOME/recent"
 NETLOG="$HOME/logs/network.log"
 PULLLOG="$HOME/logs/pull.log"
 PUSHLOG="$HOME/logs/push.log"
+NAMELOG="$HOME/logs/rename.log"
 
 usage(){
     echo "Usage: ./script.sh source destination server"
@@ -71,16 +72,13 @@ backup(){
 
 rename(){
 
-    DIR=/home/pi/backup
-    LOG=/home/pi/logs/rename.log
-
-    echo `date` >> $LOG
-
+    echo `date` >> $NAMELOG
+    
     #lowercase
     rename -v y/A-Z/a-z/ $DIR/*
 
     #get rid of Scene group
-    echo `rename -v s/\-.*?\(\.\[^\.\]*\)\$/\$1/ $DIR/*` >> $LOG
+    echo `rename -v s/\-.*?\(\.\[^\.\]*\)\$/\$1/ $DIR/*` >> $NAMELOG
 
     #find all files in DIR exclude rename.sh
     files=`find $DIR -maxdepth 1 -type f \( ! -iname ".*" \) | grep -v rename.sh`
@@ -99,11 +97,11 @@ rename(){
             if [ ! -d "$DIR/movies" ]
             then
                 mkdir $DIR/movies
-                echo "CREATED $DIR/movies FOLDER" >> $LOG
+                echo "CREATED $DIR/movies FOLDER" >> $NAMELOG
             fi
 
             #move file into $DIR/movies
-            echo `mv -v $original_file $DIR/movies` >> $LOG
+            echo `mv -v $original_file $DIR/movies` >> $NAMELOG
 
             #TV SHOW
         else
@@ -114,18 +112,18 @@ rename(){
             if [ ! -d "$DIR/tv" ]
             then
                 mkdir $DIR/tv
-                echo "CREATED $DIR/tv FOLDER" >> $LOG
+                echo "CREATED $DIR/tv FOLDER" >> $NAMELOG
             fi
 
             #check if $DIR/tv/$showname exists if not make it
             if [ ! -d "$DIR/tv/$showname" ]
             then
                 mkdir $DIR/tv/$showname
-                echo "CREATED $DIR/tv/$showname FOLDER" >> $LOG
+                echo "CREATED $DIR/tv/$showname FOLDER" >> $NAMELOG
             fi
 
             #move file to $DIR/tv/$showname
-            echo `mv -v $original_file $DIR/tv/$showname` >> $LOG
+            echo `mv -v $original_file $DIR/tv/$showname` >> $NAMELOG
         fi
     done 
 }
