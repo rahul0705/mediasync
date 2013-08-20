@@ -5,16 +5,15 @@ RSYNC=/usr/bin/rsync
 SSH=/usr/bin/ssh
 PING=/usr/bin/ping
 DATE=/usr/bin/date
-$DIR=$1
+DIR=$1
 RLFILE="$HOME/scripts/.read_lock_file"
 WLFILE="$HOME/scripts/.write_lock_file"
 
-SERVER="duo.rahulmohandas.com"
+SERVER="earth.rahulmohandas.com"
 
 CACHE="$HOME/recent"
 
 NETLOG="$HOME/logs/network.log"
-PULLLOG="$HOME/logs/pull.log"
 PUSHLOG="$HOME/logs/push.log"
 NAMELOG="$HOME/logs/rename.log"
 
@@ -38,7 +37,7 @@ clean(){
 isServerUp(){
     netcheck=`$PING -c1 $SERVER 2>&1 | grep unknown`
 
-    echo `$DATE` >> /home/pi/logs/network.log
+    echo `$DATE` >> "$NETLOG"
     if [ ! "$netcheck" = "" ]; then
         echo "Network down"  >> "$NETLOG"
         return 0;
@@ -49,7 +48,10 @@ isServerUp(){
 }
 
 backup(){
-    $FLOCK -n $RLFILE -c "$RSYNC -ravz --log-file="$PULLLOG" --remove-source-files --exclude=".*" buu:/home/rahul/videos/Scene/ /home/pi/backup/"
+    $FLOCK -n $RLFILE -c "$RSYNC --recursive --partial --perms --times --group --owner --verbose --compress --log-file="$PUSHLOG" --remove-source-files --exclude=".*" /home/rahul/videos/scene/ $SERVER:/home/rahul/backup/"
+}
+
+recentCache(){
     $FLOCK -n $WLFILE -c "rm -r $CACHE"
     $FLOCK -n $WLFILE -c "mkdir $CACHE"
 
@@ -71,15 +73,14 @@ backup(){
     $FLOCK -n $WLFILE -c "rm -r $CACHE"
 }
 
-rename(){
-
+change(){
     echo `date` >> $NAMELOG
     
     #lowercase
-    rename -v y/A-Z/a-z/ $DIR/*
+    echo `rename -v y/A-Z/a-z/ $DIR/*` >> $NAMELOG
 
     #get rid of Scene group
-    echo `rename -v s/\-.*?\(\.\[^\.\]*\)\$/\$1/ $DIR/*` >> $NAMELOG
+    echo `rename -v s/\-.*\.\(\[a-z\]\{3\}\)/\.\\$1/ $DIR/*` >> $NAMELOG
 
     #find all files in DIR exclude rename.sh
     files=`find $DIR -maxdepth 1 -type f \( ! -iname ".*" \) | grep -v rename.sh`
@@ -87,8 +88,10 @@ rename(){
     for original_file in $files
     do
         #get rid of DIR in string
-        file=`echo $original_file | sed -e "s/\"$DIR\"\///"`
-        #check if file has regex for a tv show
+        #file=`echo $original_file | sed -e s/$DIR\///`
+        file=`basename $original_file`
+	
+	#check if file has regex for a tv show
         echo $file | grep -P "\.s([0-9]+)e([0-9]+)" > /dev/null
 
         #MOVIE
@@ -128,4 +131,3 @@ rename(){
         fi
     done 
 }
-usage;
