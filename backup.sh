@@ -5,11 +5,10 @@ RSYNC=/usr/bin/rsync
 SSH=/usr/bin/ssh
 PING=/usr/bin/ping
 DATE=/usr/bin/date
-DIR=$1
+SRC=$1
+DEST=$2
 RLFILE="$HOME/scripts/.read_lock_file"
 WLFILE="$HOME/scripts/.write_lock_file"
-
-SERVER="earth.rahulmohandas.com"
 
 CACHE="$HOME/recent"
 
@@ -18,16 +17,16 @@ PUSHLOG="$HOME/logs/push.log"
 NAMELOG="$HOME/logs/rename.log"
 
 usage(){
-    echo "Usage: ./script.sh source destination server"
+    echo "Usage: ./script.sh source server:destintion"
     echo
     echo "source: must be full path"
     echo -e "\texample: /home/<user>/backupdir/"
     echo
-    echo "destination: must be full path"
-    echo -e "\texample: /home/<user>/backup/"
-    echo
     echo "server must be a full domain name"
     echo -e "\texample: test.example.com"
+    echo
+    echo "destination: must be full path"
+    echo -e "\texample: /home/<user>/backup/"
 }
 
 clean(){
@@ -35,7 +34,8 @@ clean(){
 }
 
 isServerUp(){
-    netcheck=`$PING -c1 $SERVER 2>&1 | grep unknown`
+    server=`echo $DEST | cut -d: -f1`
+    netcheck=`$PING -c1 $server 2>&1 | grep unknown`
 
     echo `$DATE` >> "$NETLOG"
     if [ ! "$netcheck" = "" ]; then
@@ -48,7 +48,7 @@ isServerUp(){
 }
 
 backup(){
-    $FLOCK -n $RLFILE -c "$RSYNC --recursive --partial --perms --times --group --owner --verbose --compress --log-file="$PUSHLOG" --remove-source-files --exclude=".*" /home/rahul/videos/scene/ $SERVER:/home/rahul/backup/"
+    $FLOCK -n $RLFILE -c "$RSYNC --recursive --partial --perms --times --group --owner --verbose --compress --log-file="$PUSHLOG" --remove-source-files --exclude=".*" $SRC $DEST"
 }
 
 recentCache(){
@@ -77,18 +77,18 @@ change(){
     echo `date` >> $NAMELOG
     
     #lowercase
-    echo `rename -v y/A-Z/a-z/ $DIR/*` >> $NAMELOG
+    echo `rename -v y/A-Z/a-z/ $SRC/*` >> $NAMELOG
 
     #get rid of Scene group
-    echo `rename -v s/\-.*\.\(\[a-z\]\{3\}\)/\.\\$1/ $DIR/*` >> $NAMELOG
+    echo `rename -v s/\-.*\.\(\[a-z\]\{3\}\)/\.\\$1/ $SRC/*` >> $NAMELOG
 
-    #find all files in DIR exclude rename.sh
-    files=`find $DIR -maxdepth 1 -type f \( ! -iname ".*" \) | grep -v rename.sh`
+    #find all files in SRC exclude rename.sh
+    files=`find $SRC -maxdepth 1 -type f \( ! -iname ".*" \) | grep -v rename.sh`
 
     for original_file in $files
     do
-        #get rid of DIR in string
-        #file=`echo $original_file | sed -e s/$DIR\///`
+        #get rid of SRC in string
+        #file=`echo $original_file | sed -e s/$SRC\///`
         file=`basename $original_file`
 	
 	#check if file has regex for a tv show
@@ -97,37 +97,37 @@ change(){
         #MOVIE
         if [ $? -gt 0 ]
         then
-            #check if $DIR/movies exists if not make it
-            if [ ! -d "$DIR/movies" ]
+            #check if $SRC/movies exists if not make it
+            if [ ! -d "$SRC/movies" ]
             then
-                mkdir $DIR/movies
-                echo "CREATED $DIR/movies FOLDER" >> $NAMELOG
+                mkdir $SRC/movies
+                echo "CREATED $SRC/movies FOLDER" >> $NAMELOG
             fi
 
-            #move file into $DIR/movies
-            echo `mv -v $original_file $DIR/movies` >> $NAMELOG
+            #move file into $SRC/movies
+            echo `mv -v $original_file $SRC/movies` >> $NAMELOG
 
             #TV SHOW
         else
             #get show name
             showname=`echo $file | sed -re 's/\.s[0-9]+e[0-9]+.*$//'`
 
-            #check if $DIR/tv exists if not make it
-            if [ ! -d "$DIR/tv" ]
+            #check if $SRC/tv exists if not make it
+            if [ ! -d "$SRC/tv" ]
             then
-                mkdir $DIR/tv
-                echo "CREATED $DIR/tv FOLDER" >> $NAMELOG
+                mkdir $SRC/tv
+                echo "CREATED $SRC/tv FOLDER" >> $NAMELOG
             fi
 
-            #check if $DIR/tv/$showname exists if not make it
-            if [ ! -d "$DIR/tv/$showname" ]
+            #check if $SRC/tv/$showname exists if not make it
+            if [ ! -d "$SRC/tv/$showname" ]
             then
-                mkdir $DIR/tv/$showname
-                echo "CREATED $DIR/tv/$showname FOLDER" >> $NAMELOG
+                mkdir $SRC/tv/$showname
+                echo "CREATED $SRC/tv/$showname FOLDER" >> $NAMELOG
             fi
 
-            #move file to $DIR/tv/$showname
-            echo `mv -v $original_file $DIR/tv/$showname` >> $NAMELOG
+            #move file to $SRC/tv/$showname
+            echo `mv -v $original_file $SRC/tv/$showname` >> $NAMELOG
         fi
     done 
 }
