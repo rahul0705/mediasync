@@ -70,7 +70,7 @@ renameMedia(){
 
     echo "hello"
     #get rid of Scene group
-    logger -s -t mediaSync "`rename -v s/\-.*.\.\(\[a-z\|0-9\]\{3\}$\)/\.\$1/ $SRC/*`"
+    logger -s -t mediaSync "`rename -v 's/(?:\-.*?)(\.[a-z|0-9]{3}$)/$1/' $SRC/*`"
 
     #find all files in SRC
     files=`find $SRC -maxdepth 1 -type f \( ! -iname ".*" \)`
@@ -81,7 +81,7 @@ renameMedia(){
         file=`basename $original_file`
 	
 	#check if file has regex for a tv show
-        echo $file | grep -P "\.s([0-9]+)e([0-9]+)" > /dev/null
+        echo $file | grep -P "\.s([0-9]+).?e([0-9]+)" > /dev/null
 
         #MOVIE
         if [ $? -gt 0 ]
@@ -99,7 +99,7 @@ renameMedia(){
             #TV SHOW
         else
             #get show name
-            showname=`echo $file | sed -re 's/\.s[0-9]+e[0-9]+.*$//'`
+            showname=`echo $file | sed -re 's/\.s[0-9]+.?e[0-9]+.*$//'`
 
             #check if $SRC/tv exists if not make it
             if [ ! -d "$SRC/tv" ]
