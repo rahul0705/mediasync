@@ -1,20 +1,14 @@
 mediaSync
 =========
 
-Sync media files across multiple computers
+Wrapper for rsync to send files from one server to another (files will not be perserved in orginating server)
+Files can be renamed to match XBMC directory structures
 
-If computer A and B was running this script then A would push data to B
-which when B has the data would send to C D E
-as long as they are all able to connect
 
-        		+---+
-        		| E |
-        		+---+
-        	       /
-	+---+  +---+  / +---+
-	| A |->| B |--->| D |
-	+---+  +---+ \  +---+
-        	      \
-        		+---+
-        		| C |
-        		+---+
+Recommended to run in a screen session
+
+Examples on how to use:
+	sync files that appear in directory A to B (Files will be deleted in A)
+		mediasync A B
+	sync files that appear in directory A to B renaming files with XBMC directories
+		mediasync -r A B

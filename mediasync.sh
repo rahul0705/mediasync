@@ -2,15 +2,9 @@
 
 FLOCK=/usr/bin/flock
 RSYNC=/usr/bin/rsync
-SSH=/usr/bin/ssh
-PING=/usr/bin/ping
-DATE=/usr/bin/date
-RLFILE="$HOME/scripts/.rsync_lock_file"
-WLFILE="$HOME/scripts/.write_lock_file"
-
-CACHE="$HOME/recent"
-
-LOG="/var/log/mediasync.log"
+INOTIFYWAIT=/usr/bin/inotifywait
+RLFILE=var/run/mediasync.lock
+LOG=/var/log/mediasync.log
 
 usage(){
     echo "Usage: ./script.sh [-hr] source [server:]destintion"
@@ -34,7 +28,7 @@ usage(){
 
 watchMedia(){
 	echo "$SRC"
-	inotifywait -m -e close_write "$WATCHSRC" |
+	$INOTIFYWAIT -m -e close_write "$WATCHSRC" |
 		while read dir event file
 		do
 			logger -s -t mediasync "$file has matched $event in $dir" 2>> $LOG
@@ -169,4 +163,19 @@ main(){
     watchMedia $renameFlag
 }
 
+on_end(){
+    logger -s -t mediasync "mediasync is terminating..." 2>> $LOG
+    rm -rf $SRC
+    kill $(jobs -p)
+    logger -s -t mediasync "mediasync is terminated" 2>> $LOG
+    exit 0
+}
+
 main "$@"
+
+trap 'on_end' EXIT
+trap 'on_end' SIGHUP
+trap 'on_end' SIGINT
+trap 'on_end' SIGQUIT
+trap 'on_end' SIGKILL
+trap 'on_end' SIGTERM
