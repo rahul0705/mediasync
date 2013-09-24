@@ -8,6 +8,41 @@ Files can be renamed to match XBMC directory structures
 
 Recommended to run in a screen session
 
+Installation
+------------
+
+###Requirements
+
+1. inotifywait
+
+		sudo apt-get install inotify-tools
+
+2. rsync
+
+		sudo apt-get install rsync
+
+3. rename
+
+		built into debian/ubuntu
+	
+4. logrotate
+
+		sudo apt-get install logrotate
+
+###Install
+
+	sudo make install
+
+###Uninstall
+
+	sudo make uninstall
+
+Directories modified:
+* /usr/local/bin
+* /etc/logrotate.d/
+* /var/log/
+* /var/run/
+
 Examples
 --------
 
@@ -41,6 +76,6 @@ to the path /path/to/dest on server (optional) (Files will be deleted in A):
 Bugs
 ----
 
-* mediasync currently only has the capability of monitoring one directory and no sub-direcoties inside of it.
+* mediasync currently only has the capability of monitoring one directory and no sub-directories inside of it.
 * Currently the only things that match a "TV" release would be something containing sXXeXX.
-* Items that do not match "TV" releases will be defaulted into "Movie" releases.
+* Items that do not match "TV" releases will be defaulted into "Movies" releases.
